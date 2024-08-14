@@ -42,7 +42,7 @@
       }
 
       function ToDoList() {
-        const [toDos, setTodos] = React.useState([
+        const [todos, setTodos] = React.useState([
           { id: 1, text: "Task 1", completed: false },
           { id: 2, text: "Task 2", completed: true },
           { id: 3, text: "Task 3", completed: false },
@@ -55,17 +55,17 @@
           if (storedTodos) {
             setTodos(storedTodos);
           }
-        }, []);
+        }, []); // Run only once on component mount
 
         React.useEffect(() => {
-          localStorage.setItem("todos", JSON.stringify(toDos));
-        }, [toDos]);
+          localStorage.setItem("todos", JSON.stringify(todos));
+        }, [todos]); // Run whenever todos changes
 
         const addTodo = () => {
           if (newTodo.trim()) {
             setTodos([
-              ...toDos,
-              { id: toDos.length + 1, text: newTodo, completed: false },
+              ...todos,
+              { id: todos.length + 1, text: newTodo, completed: false },
             ]);
             setNewTodo("");
           }
@@ -73,7 +73,7 @@
 
         const toggleTodo = (id) => {
           setTodos(
-            toDos.map((toDo) =>
+            todos.map((toDo) =>
               toDo.id === id ? { ...toDo, completed: !toDo.completed } : toDo
             )
           );
@@ -82,7 +82,7 @@
         const editTodo = (id, text) => {
           if (text.trim()) {
             setTodos(
-              toDos.map((toDo) =>
+              todos.map((toDo) =>
                 toDo.id === id ? { ...toDo, text: text } : toDo
               )
             );
@@ -90,14 +90,14 @@
         };
 
         const deleteTodo = (id) => {
-          setTodos(toDos.filter((toDo) => toDo.id !== id));
+          setTodos(todos.filter((toDo) => toDo.id !== id));
         };
 
         return (
           <div>
             <h2>Tasks</h2>
             <div>
-              {toDos.map((toDo) => (
+              {todos.map((toDo) => (
                 <ToDoListItem
                   key={toDo.id}
                   text={toDo.text}
