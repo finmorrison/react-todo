@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React To Do</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- React and ReactDOM -->
+    <script
+      src="https://unpkg.com/react@18/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <!-- Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      function App() {
+        return (
+          <div>
+            <h1>Hello, World!</h1>
+            <p>This is a small React to do project.</p>
+            <ul>
+              <li>
+                Features: Add, edit, delete tasks; mark tasks as completed.
+                Persist tasks using localStorage.
+              </li>
+              <li>
+                Key Concepts: React state, props, lists, conditional rendering,
+                useEffect for localStorage.
+              </li>
+            </ul>
+            {ToDoList()}
+          </div>
+        );
+      }
+
+      function ToDoList() {
+        const [toDos, setTodos] = React.useState([
+          { id: 1, text: "Task 1", completed: false },
+          { id: 2, text: "Task 2", completed: true },
+          { id: 3, text: "Task 3", completed: false },
+        ]);
+
+        const [newTodo, setNewTodo] = React.useState("");
+
+        React.useEffect(() => {
+          const storedTodos = JSON.parse(localStorage.getItem("todos"));
+          if (storedTodos) {
+            setTodos(storedTodos);
+          }
+        }, []);
+
+        React.useEffect(() => {
+          localStorage.setItem("todos", JSON.stringify(toDos));
+        }, [toDos]);
+
+        const addTodo = () => {
+          if (newTodo.trim()) {
+            setTodos([
+              ...toDos,
+              { id: toDos.length + 1, text: newTodo, completed: false },
+            ]);
+            setNewTodo("");
+          }
+        };
+
+        const toggleTodo = (id) => {
+          setTodos(
+            toDos.map((toDo) =>
+              toDo.id === id ? { ...toDo, completed: !toDo.completed } : toDo
+            )
+          );
+        };
+
+        const editTodo = (id, text) => {
+          if (text.trim()) {
+            setTodos(
+              toDos.map((toDo) =>
+                toDo.id === id ? { ...toDo, text: text } : toDo
+              )
+            );
+          }
+        };
+
+        const deleteTodo = (id) => {
+          setTodos(toDos.filter((toDo) => toDo.id !== id));
+        };
+
+        return (
+          <div>
+            <h2>Tasks</h2>
+            <div>
+              {toDos.map((toDo) => (
+                <ToDoListItem
+                  key={toDo.id}
+                  text={toDo.text}
+                  completed={toDo.completed}
+                  toggleTodo={() => toggleTodo(toDo.id)}
+                  editTodo={(text) => editTodo(toDo.id, text)}
+                  deleteTodo={() => deleteTodo(toDo.id)}
+                />
+              ))}
+            </div>
+            {ToDoInput({ newTodo, setNewTodo, addTodo })}
+          </div>
+        );
+      }
+
+      function ToDoListItem({
+        text,
+        completed,
+        toggleTodo,
+        editTodo,
+        deleteTodo,
+      }) {
+        const [isEditing, setIsEditing] = React.useState(false);
+        const [newText, setNewText] = React.useState(text);
+        return (
+          <div style={{ textDecoration: completed ? "line-through" : "none" }}>
+            <input type="checkbox" checked={completed} onChange={toggleTodo} />
+            {isEditing ? (
+              <input
+                type="text"
+                value={newText}
+                onChange={(e) => setNewText(e.target.value)}
+              />
+            ) : (
+              <span>{text}</span>
+            )}
+            <button
+              onClick={() => {
+                setIsEditing((prev) => !prev);
+                isEditing && editTodo(newText);
+              }}
+            >
+              {isEditing ? "Save" : "Edit"}
+            </button>
+            <button onClick={deleteTodo}>Delete</button>
+          </div>
+        );
+      }
+
+      function ToDoInput({ newTodo, setNewTodo, addTodo }) {
+        return (
+          <div>
+            <input
+              placeholder="Add a new task"
+              type="text"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+            />
+            <button onClick={() => addTodo(newTodo)}>Add</button>
+          </div>
+        );
+      }
+
+      // Render the React component to the root div
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
